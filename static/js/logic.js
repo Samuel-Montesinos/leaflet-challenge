@@ -1,26 +1,25 @@
 // logic.js
 
-// Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', function () {
-    // Create a map instance and set its center and zoom level
+    // mpa instance
     var map = L.map('map').setView([0, 0], 2);
   
-    // Create a tile layer to add to the map
+    // tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
       maxZoom: 18,
     }).addTo(map);
   
-    // Fetch earthquake data from the USGS API
+    // getting info
     fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson')
       .then(function (response) {
         return response.json();
       })
       .then(function (data) {
-        // Process the earthquake data
+        // analysis
         var earthquakes = data.features;
   
-        // Define marker options for size and color
+        // markers
         var markerOptions = {
           radius: 5, // default size
           fillColor: 'orange',
@@ -30,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
           fillOpacity: 0.8,
         };
   
-        // Loop through the earthquakes and add markers to the map
+        // adding markers
         earthquakes.forEach(function (earthquake) {
           var lat = earthquake.geometry.coordinates[1];
           var lng = earthquake.geometry.coordinates[0];
@@ -38,16 +37,16 @@ document.addEventListener('DOMContentLoaded', function () {
           var depth = earthquake.geometry.coordinates[2];
           var title = earthquake.properties.title;
   
-          // Adjust marker size based on magnitude
+          // setting marker size to match magnitude
           markerOptions.radius = mag * 2;
   
-          // Adjust marker color based on depth
+          // marker color for depth
           markerOptions.fillColor = getMarkerColor(depth);
   
-          // Create a marker at the earthquake's location with the customized options
+          // marker at the earthquake's location
           var marker = L.circleMarker([lat, lng], markerOptions).addTo(map);
   
-          // Set the marker's popup content
+          // marker popup
           marker.bindPopup(
             '<b>Title:</b> ' +
               title +
@@ -59,16 +58,16 @@ document.addEventListener('DOMContentLoaded', function () {
           );
         });
   
-        // Create a legend control
+        // legend
         var legend = L.control({ position: 'bottomright' });
   
-        // Function to generate the legend HTML content
+        // setting legend colors
         legend.onAdd = function () {
           var div = L.DomUtil.create('div', 'info legend');
           var depthRanges = ['0-10', '11-30', '31-50', '51+'];
           var colors = ['#FF5722', '#FF9800', '#FFC107', '#FFEB3B'];
   
-          // Generate HTML for the legend
+          // legend HTML
           var html = '<h4>Depth</h4>';
           for (var i = 0; i < depthRanges.length; i++) {
             html +=
@@ -83,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
           return div;
         };
   
-        // Add the legend to the map
+        // putting legend on map
         legend.addTo(map);
       })
       .catch(function (error) {
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
   
-  // Function to calculate the marker color based on depth
+  // marker color based on depth. Instructions did not specify quantile so used basic separation colors
   function getMarkerColor(depth) {
     var color;
   
